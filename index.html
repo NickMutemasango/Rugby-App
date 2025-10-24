@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zimbabwe Rugby Union - Database Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --zru-green: #2C5F4F;
+            --zru-gold: #D4AF37;
+            --light-bg: #f5f5f5;
+            --white: #ffffff;
+            --text-dark: #333;
+            --border-color: #ddd;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--zru-green), #1a3d2f);
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .logo-section p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info span {
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .offline-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-left: 5px;
+        }
+
+        .offline-indicator.offline {
+            background: var(--danger);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--white);
+            border-bottom: 3px solid var(--zru-gold);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem;
+            background: var(--white);
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--light-bg);
+            border-bottom-color: var(--zru-gold);
+        }
+
+        .nav-btn.active {
+            background: var(--zru-green);
+            color: var(--white);
+            border-bottom-color: var(--zru-gold);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .module {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .module.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--zru-gold);
+        }
+
+        .card-header h2 {
+            color: var(--zru-green);
+            font-size: 1.8rem;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--zru-green);
+        }
+
+        .form-group label.required::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--zru-green);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--zru-green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #1a3d2f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: var(--zru-gold);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #c19b2e;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--zru-green);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        /* Search & Filter */
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input,
+        .search-bar select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Stats Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--zru-green), #1a3d2f);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: var(--light-bg);
+        }
+
+        .tab-btn.active {
+            color: var(--zru-green);
+            border-bottom-color: var(--zru-gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--zru-green);
+            background: var(--light-bg);
+        }
+
+        /* Checkbox & Radio */
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group label,
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-info {
+                text-align: center;
+                margin-top: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-btn {
+                min-width: 120px;
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid var(--light-bg);
+            border-top: 4px solid var(--zru-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🏉 Zimbabwe Rugby Union</h1>
+                <p>Database Management System - RWC 2027</p>
+            </div>
+            <div class="user-info">
+                <span><strong>Administrator</strong></span>
+                <span>Last Sync: <span id="lastSync">Never</span></span>
+                <span>Status: <span id="connectionStatus">Online</span> <span class="offline-indicator" id="offlineIndicator"></span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="showModule('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showModule('players')">Players</button>
+            <button class="nav-btn" onclick="showModule('teams')">Teams</button>
+            <button class="nav-btn" onclick="showModule('transfers')">Transfers</button>
+            <button class="nav-btn" onclick="showModule('testMatch')">Test Match Request</button>
+            <button class="nav-btn" onclick="showModule('officials')">Match Officials</button>
+            <button class="nav-btn" onclick="showModule('reports')">Reports</button>
+            <button class="nav-btn" onclick="showModule('settings')">Settings</button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard Module -->
+        <div id="dashboard" class="module active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Dashboard Overview</h2>
+                    <button class="btn btn-secondary" onclick="syncData()">🔄 Sync Data</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalPlayers">1,247</h3>
+                        <p>Registered Players</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalTeams">45</h3>
+                        <p>Active Teams</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="pendingTransfers">12</h3>
+                        <p>Pending Transfers</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="testMatchRequests">8</h3>
+                        <p>Test Match Requests</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalOfficials">87</h3>
+                        <p>Match Officials</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="confirmedMatches">3</h3>
+                        <p>Confirmed Test Matches</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>ℹ️ System Notice:</strong> All data is stored locally for offline access. Remember to sync regularly when online.
+                </div>
+
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivity">
+                            <tr>
+                                <td>2025-10-24</td>
+                                <td>Player Registration</td>
+                                <td>New player: John Doe</td>
+                                <td><span class="badge badge-success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-10-23</td>
+                                <td>Transfer</td>
+                                <td>Player transfer: Jane Smith</td>
+                                <td><span class="badge badge-warning">Pending</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-10-22</td>
+                                <td>Test Match Request</td>
+                                <td>Request submitted: Zimbabwe vs Kenya</td>
+                                <td><span class="badge badge-info">Under Review</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Players Module -->
+        <div id="players" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Player Management</h2>
+                    <button class="btn btn-primary" onclick="showTab('playerRegistration')">➕ New Player</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('playerSearch')">Search Players</button>
+                    <button class="tab-btn" onclick="showTab('playerRegistration')">Register Player</button>
+                </div>
+
+                <!-- Search Players Tab -->
+                <div id="playerSearch" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Search by name, ID, or club..." id="playerSearchInput">
+                        <select class="form-control" id="positionFilter">
+                            <option value="">All Positions</option>
+                            <option value="prop">Prop</option>
+                            <option value="hooker">Hooker</option>
+                            <option value="lock">Lock</option>
+                            <option value="flanker">Flanker</option>
+                            <option value="number8">Number 8</option>
+                            <option value="scrumhalf">Scrum Half</option>
+                            <option value="flyhalf">Fly Half</option>
+                            <option value="center">Center</option>
+                            <option value="wing">Wing</option>
+                            <option value="fullback">Fullback</option>
+                        </select>
+                        <select class="form-control" id="clubFilter">
+                            <option value="">All Clubs</option>
+                            <option value="harare">Harare Sports Club</option>
+                            <option value="old-georgians">Old Georgians</option>
+                            <option value="old-miltonians">Old Miltonians</option>
+                            <option value="bulawayo-athletic">Bulawayo Athletic Club</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="searchPlayers()">Search</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Name</th>
+                                    <th>ID Number</th>
+                                    <th>Position</th>
+                                    <th>Club</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playerTableBody">
+                                <tr>
+                                    <td>👤</td>
+                                    <td>Takudzwa Musingwini</td>
+                                    <td>ZRU-2025-001</td>
+                                    <td>Flanker</td>
+                                    <td>Harare Sports Club</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>👤</td>
+                                    <td>Simba Mandevere</td>
+                                    <td>ZRU-2025-002</td>
+                                    <td>Fly Half</td>
+                                    <td>Old Georgians</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Register Player Tab -->
+                <div id="playerRegistration" class="tab-content">
+                    <form id="playerRegistrationForm">
+                        <h3>Personal Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">First Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Last Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Date of Birth</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">National ID / Passport</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Email</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Mobile Number</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Playing Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Primary Position</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Position</option>
+                                    <option value="prop">Prop</option>
+                                    <option value="hooker">Hooker</option>
+                                    <option value="lock">Lock</option>
+                                    <option value="flanker">Flanker</option>
+                                    <option value="number8">Number 8</option>
+                                    <option value="scrumhalf">Scrum Half</option>
+                                    <option value="flyhalf">Fly Half</option>
+                                    <option value="center">Center</option>
+                                    <option value="wing">Wing</option>
+                                    <option value="fullback">Fullback</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Secondary Position</label>
+                                <select class="form-control">
+                                    <option value="">Select Position</option>
+                                    <option value="prop">Prop</option>
+                                    <option value="hooker">Hooker</option>
+                                    <option value="lock">Lock</option>
+                                    <option value="flanker">Flanker</option>
+                                    <option value="number8">Number 8</option>
+                                    <option value="scrumhalf">Scrum Half</option>
+                                    <option value="flyhalf">Fly Half</option>
+                                    <option value="center">Center</option>
+                                    <option value="wing">Wing</option>
+                                    <option value="fullback">Fullback</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Current Club</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Club</option>
+                                    <option value="harare">Harare Sports Club</option>
+                                    <option value="old-georgians">Old Georgians</option>
+                                    <option value="old-miltonians">Old Miltonians</option>
+                                    <option value="bulawayo-athletic">Bulawayo Athletic Club</option>
+                                    <option value="mutare">Mutare Sports Club</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Provincial Union</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Union</option>
+                                    <option value="harare">Harare Metropolitan</option>
+                                    <option value="bulawayo">Bulawayo Metropolitan</option>
+                                    <option value="manicaland">Manicaland</option>
+                                    <option value="mashonaland">Mashonaland</option>
+                                    <option value="matabeleland">Matabeleland</option>
+                                    <option value="midlands">Midlands</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Medical Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Blood Type</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Blood Type</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Medical Conditions</label>
+                                <textarea class="form-control" placeholder="List any relevant medical conditions..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Allergies</label>
+                                <textarea class="form-control" placeholder="List any allergies..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Insurance Provider</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Insurance Policy Number</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Emergency Contact</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Contact Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Relationship</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Contact Number</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Alternative Number</label>
+                                <input type="tel" class="form-control">
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Eligibility Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Birth Country</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Previous International Representation</label>
+                                <select class="form-control">
+                                    <option value="none">None</option>
+                                    <option value="age-grade">Age Grade Only</option>
+                                    <option value="senior">Senior Level</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Residency Start Date (if applicable)</label>
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Photo Upload</h3>
+                        <div class="file-upload">
+                            <p>📸 Click to upload player photo</p>
+                            <input type="file" accept="image/*" style="display: none;" id="playerPhoto">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Register Player</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('playerRegistrationForm').reset()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teams Module -->
+        <div id="teams" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Team Management</h2>
+                    <button class="btn btn-primary" onclick="showTab('teamRegistration')">➕ New Team</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('teamList')">Team List</button>
+                    <button class="tab-btn" onclick="showTab('teamRegistration')">Register Team</button>
+                </div>
+
+                <!-- Team List Tab -->
+                <div id="teamList" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Search teams..." id="teamSearchInput">
+                        <select class="form-control" id="teamTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="national">National Team</option>
+                            <option value="provincial">Provincial</option>
+                            <option value="club">Club</option>
+                            <option value="age-grade">Age Grade</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="searchTeams()">Search</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Type</th>
+                                    <th>Province/Club</th>
+                                    <th>Players</th>
+                                    <th>Coach</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Zimbabwe Sables</td>
+                                    <td><span class="badge badge-success">National</span></td>
+                                    <td>National</td>
+                                    <td>35</td>
+                                    <td>Brendan Dawson</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Harare Metropolitan</td>
+                                    <td><span class="badge badge-info">Provincial</span></td>
+                                    <td>Harare</td>
+                                    <td>28</td>
+                                    <td>TBA</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Team Registration Tab -->
+                <div id="teamRegistration" class="tab-content">
+                    <form id="teamRegistrationForm">
+                        <h3>Team Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Team Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Team Type</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Type</option>
+                                    <option value="national">National Team</option>
+                                    <option value="provincial">Provincial</option>
+                                    <option value="club">Club</option>
+                                    <option value="age-grade">Age Grade</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Province/Region</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Province</option>
+                                    <option value="harare">Harare Metropolitan</option>
+                                    <option value="bulawayo">Bulawayo Metropolitan</option>
+                                    <option value="manicaland">Manicaland</option>
+                                    <option value="mashonaland">Mashonaland</option>
+                                    <option value="matabeleland">Matabeleland</option>
+                                    <option value="midlands">Midlands</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Home Venue</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Coaching Staff</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Head Coach</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Assistant Coach</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Team Manager</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Medical Officer</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Register Team</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('teamRegistrationForm').reset()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfers Module -->
+        <div id="transfers" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Transfer Management</h2>
+                    <button class="btn btn-primary" onclick="showTab('newTransfer')">➕ New Transfer</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('transferList')">Transfer List</button>
+                    <button class="tab-btn" onclick="showTab('newTransfer')">New Transfer</button>
+                </div>
+
+                <!-- Transfer List Tab -->
+                <div id="transferList" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Search transfers..." id="transferSearchInput">
+                        <select class="form-control" id="transferStatusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select class="form-control" id="transferTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="domestic">Domestic</option>
+                            <option value="international">International</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="searchTransfers()">Search</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Player</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-10-20</td>
+                                    <td>John Doe</td>
+                                    <td>Old Georgians</td>
+                                    <td>Harare SC</td>
+                                    <td>Domestic</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">Review</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- New Transfer Tab -->
+                <div id="newTransfer" class="tab-content">
+                    <form id="transferForm">
+                        <h3>Transfer Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Transfer Type</label>
+                                <select class="form-control" id="transferType" required onchange="toggleTransferFields()">
+                                    <option value="">Select Type</option>
+                                    <option value="domestic">Domestic Transfer</option>
+                                    <option value="international">International Transfer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Player Name/ID</label>
+                                <input type="text" class="form-control" required placeholder="Search player...">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Current Club/Union</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Destination Club/Union</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Effective Date</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Reason for Transfer</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Reason</option>
+                                    <option value="relocation">Relocation</option>
+                                    <option value="employment">Employment</option>
+                                    <option value="education">Education</option>
+                                    <option value="opportunity">Playing Opportunity</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="internationalFields" style="display: none;">
+                            <h3 style="margin-top: 2rem;">International Transfer Requirements</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>World Rugby Clearance Number</label>
+                                    <input type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Previous Union</label>
+                                    <input type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Destination Country</label>
+                                    <input type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Eligibility Status</label>
+                                    <select class="form-control">
+                                        <option value="">Select Status</option>
+                                        <option value="eligible">Eligible</option>
+                                        <option value="pending">Pending Verification</option>
+                                        <option value="ineligible">Ineligible</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Supporting Documents</h3>
+                        <div class="file-upload">
+                            <p>📎 Click to upload supporting documents (clearance letters, etc.)</p>
+                            <input type="file" accept=".pdf,.doc,.docx" multiple style="display: none;" id="transferDocs">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Submit Transfer Request</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('transferForm').reset()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Match Request Module -->
+        <div id="testMatch" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Test Match Request System</h2>
+                    <button class="btn btn-primary" onclick="showTab('newTestMatch')">➕ New Request</button>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>ℹ️ Process Flow:</strong> Request → ZRU Approval → Rugby Africa Notification → World Rugby Notification → Match Confirmation
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('testMatchList')">Requests</button>
+                    <button class="tab-btn" onclick="showTab('newTestMatch')">New Request</button>
+                    <button class="tab-btn" onclick="showTab('approvedMatches')">Approved Matches</button>
+                </div>
+
+                <!-- Test Match Requests List -->
+                <div id="testMatchList" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Search requests..." id="testMatchSearchInput">
+                        <select class="form-control" id="testMatchStatusFilter">
+                            <option value="">All Status</option>
+                            <option value="submitted">Submitted to ZRU</option>
+                            <option value="zru-approved">ZRU Approved</option>
+                            <option value="ra-notified">Rugby Africa Notified</option>
+                            <option value="wr-notified">World Rugby Notified</option>
+                            <option value="confirmed">Match Confirmed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <select class="form-control" id="testMatchTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="rwc-qualifier">RWC Qualifier</option>
+                            <option value="rugby-africa">Rugby Africa Competition</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <button class="btn btn-primary">Search</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Request Date</th>
+                                    <th>Requesting Official</th>
+                                    <th>Opposition</th>
+                                    <th>Proposed Date</th>
+                                    <th>Venue</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-10-20</td>
+                                    <td>Brendan Dawson</td>
+                                    <td>Kenya</td>
+                                    <td>2026-03-15</td>
+                                    <td>Harare Sports Club</td>
+                                    <td><span class="badge badge-info">RWC Qualifier</span></td>
+                                    <td><span class="badge badge-warning">ZRU Approved</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2025-10-15</td>
+                                    <td>Technical Committee</td>
+                                    <td>Namibia</td>
+                                    <td>2026-02-20</td>
+                                    <td>Windhoek</td>
+                                    <td><span class="badge badge-success">Friendly</span></td>
+                                    <td><span class="badge badge-success">Match Confirmed</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2025-10-10</td>
+                                    <td>Brendan Dawson</td>
+                                    <td>Uganda</td>
+                                    <td>2026-04-10</td>
+                                    <td>Bulawayo AC</td>
+                                    <td><span class="badge badge-info">Rugby Africa</span></td>
+                                    <td><span class="badge badge-info">Submitted to ZRU</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- New Test Match Request -->
+                <div id="newTestMatch" class="tab-content">
+                    <form id="testMatchRequestForm">
+                        <h3>Requesting Official Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Your Name</label>
+                                <input type="text" class="form-control" required placeholder="Full name">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Position/Role</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Role</option>
+                                    <option value="head-coach">Head Coach - Men's 15s</option>
+                                    <option value="head-coach-women">Head Coach - Women's 15s</option>
+                                    <option value="head-coach-7s">Head Coach - Men's 7s</option>
+                                    <option value="head-coach-women-7s">Head Coach - Women's 7s</option>
+                                    <option value="technical-director">Technical Director</option>
+                                    <option value="technical-committee">Technical Committee Member</option>
+                                    <option value="hp-manager">High Performance Manager</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Email</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Mobile Number</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Match Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Zimbabwe Team</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Team</option>
+                                    <option value="sables">Zimbabwe Sables (Men's 15s)</option>
+                                    <option value="ladies">Zimbabwe Ladies (Women's 15s)</option>
+                                    <option value="men-7s">Zimbabwe Men's 7s</option>
+                                    <option value="women-7s">Zimbabwe Women's 7s</option>
+                                    <option value="u20">Zimbabwe U20</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Opposition Team</label>
+                                <input type="text" class="form-control" required placeholder="e.g., Kenya, Namibia, Uganda">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Opposition Union</label>
+                                <input type="text" class="form-control" required placeholder="e.g., Kenya Rugby Union">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Match Type</label>
+                                <select class="form-control" required id="matchType" onchange="toggleMatchTypeFields()">
+                                    <option value="">Select Type</option>
+                                    <option value="friendly">Friendly Test Match</option>
+                                    <option value="rwc-qualifier">Rugby World Cup Qualifier</option>
+                                    <option value="rugby-africa">Rugby Africa Competition</option>
+                                    <option value="cwg">Commonwealth Games</option>
+                                    <option value="sevens-series">World Rugby Sevens Series</option>
+                                    <option value="other">Other Tournament/Competition</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="competitionFields" style="display: none;">
+                            <div class="form-group">
+                                <label class="required">Competition/Tournament Name</label>
+                                <input type="text" class="form-control" placeholder="e.g., Rugby Africa Cup 2026">
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Proposed Date & Venue</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Proposed Match Date</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Kick-off Time</label>
+                                <input type="time" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Venue Type</label>
+                                <select class="form-control" required id="venueType" onchange="toggleVenueFields()">
+                                    <option value="">Select Venue Type</option>
+                                    <option value="home">Home (Zimbabwe)</option>
+                                    <option value="away">Away (Opposition Territory)</option>
+                                    <option value="neutral">Neutral Venue</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="homeVenueFields" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="required">Stadium/Ground</label>
+                                    <select class="form-control" required>
+                                        <option value="">Select Stadium</option>
+                                        <option value="harare-sc">Harare Sports Club</option>
+                                        <option value="bulawayo-ac">Bulawayo Athletic Club</option>
+                                        <option value="police-grounds">Police Grounds, Harare</option>
+                                        <option value="gwanzura">Gwanzura Stadium</option>
+                                        <option value="barbourfields">Barbourfields Stadium</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="required">City</label>
+                                    <select class="form-control" required>
+                                        <option value="">Select City</option>
+                                        <option value="harare">Harare</option>
+                                        <option value="bulawayo">Bulawayo</option>
+                                        <option value="mutare">Mutare</option>
+                                        <option value="gweru">Gweru</option>
+                                        <option value="masvingo">Masvingo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="awayVenueFields" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="required">Stadium/Ground</label>
+                                    <input type="text" class="form-control" required placeholder="e.g., RFUEA Ground">
+                                </div>
+                                <div class="form-group">
+                                    <label class="required">City</label>
+                                    <input type="text" class="form-control" required placeholder="e.g., Nairobi">
+                                </div>
+                                <div class="form-group">
+                                    <label class="required">Country</label>
+                                    <input type="text" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Match Objectives & Rationale</h3>
+                        <div class="form-group">
+                            <label class="required">Purpose of Match</label>
+                            <textarea class="form-control" required rows="4" placeholder="Explain the strategic importance of this test match (e.g., RWC preparation, ranking points, player development, regional competition requirement)"></textarea>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Expected Player Squad Size</label>
+                                <input type="number" class="form-control" required min="23" max="50">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Expected Support Staff Size</label>
+                                <input type="number" class="form-control" required min="5" max="30">
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Financial & Logistics</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Estimated Budget Required (USD)</label>
+                                <input type="number" class="form-control" required placeholder="Total estimated cost">
+                            </div>
+                            <div class="form-group">
+                                <label>Potential Revenue Sources</label>
+                                <textarea class="form-control" placeholder="Ticket sales, sponsorships, broadcast rights, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Accommodation Requirements</label>
+                            <textarea class="form-control" placeholder="Details about hotel bookings, training facilities, etc."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Transportation Requirements</label>
+                            <textarea class="form-control" placeholder="Details about flights, buses, local transport, etc."></textarea>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">World Rugby & Rugby Africa Requirements</h3>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" required>
+                                I confirm this match complies with World Rugby regulations
+                            </label>
+                            <label>
+                                <input type="checkbox" required>
+                                I confirm all player eligibility requirements will be met
+                            </label>
+                            <label>
+                                <input type="checkbox" required>
+                                I confirm match officials will be appointed according to World Rugby standards
+                            </label>
+                            <label>
+                                <input type="checkbox" required>
+                                I confirm venue meets minimum World Rugby safety and facility standards
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Opposition union has been informally contacted and expressed interest
+                            </label>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Supporting Documentation</h3>
+                        <div class="file-upload" onclick="document.getElementById('testMatchDocs').click()">
+                            <p>📎 Upload supporting documents (budget breakdown, venue confirmation, correspondence with opposition, etc.)</p>
+                            <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style="display: none;" id="testMatchDocs">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label>Additional Notes/Comments</label>
+                            <textarea class="form-control" rows="3" placeholder="Any additional information relevant to this test match request..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info" style="margin-top: 1.5rem;">
+                            <strong>📋 Next Steps After Submission:</strong>
+                            <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                <li>ZRU Technical Committee will review within 5 business days</li>
+                                <li>If approved, ZRU will notify Rugby Africa</li>
+                                <li>Rugby Africa will coordinate with World Rugby</li>
+                                <li>Final confirmation will be communicated to you</li>
+                            </ul>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Submit Test Match Request</button>
+                            <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">Save as Draft</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('testMatchRequestForm').reset()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Approved Matches -->
+                <div id="approvedMatches" class="tab-content">
+                    <h3>Confirmed Test Matches</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Match Date</th>
+                                    <th>Teams</th>
+                                    <th>Venue</th>
+                                    <th>Type</th>
+                                    <th>World Rugby Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2026-02-20</td>
+                                    <td>Zimbabwe vs Namibia</td>
+                                    <td>Windhoek, Namibia</td>
+                                    <td>Friendly</td>
+                                    <td><span class="badge badge-success">Confirmed</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">Details</button>
+                                        <button class="btn btn-primary" style="padding: 0.5rem;">Download Confirmation</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" style="margin-top: 2rem;">
+                        <h4>Match Preparation Checklist</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox">
+                                Squad selection completed
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Travel arrangements confirmed
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Accommodation booked
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Match officials appointed
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Medical team assigned
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Media & communications plan ready
+                            </label>
+                            <label>
+                                <input type="checkbox">
+                                Player insurance verified
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Officials Module -->
+        <div id="officials" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Match Officials Management</h2>
+                    <button class="btn btn-primary" onclick="showTab('newOfficial')">➕ New Official</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('officialsList')">Officials List</button>
+                    <button class="tab-btn" onclick="showTab('newOfficial')">Register Official</button>
+                </div>
+
+                <!-- Officials List -->
+                <div id="officialsList" class="tab-content active">
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Search officials..." id="officialSearchInput">
+                        <select class="form-control" id="officialTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="referee">Referee</option>
+                            <option value="assistant">Assistant Referee</option>
+                            <option value="tmo">TMO</option>
+                        </select>
+                        <select class="form-control" id="officialLevelFilter">
+                            <option value="">All Levels</option>
+                            <option value="international">International</option>
+                            <option value="national">National</option>
+                            <option value="provincial">Provincial</option>
+                        </select>
+                        <button class="btn btn-primary">Search</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Level</th>
+                                    <th>Matches</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Aimee Barrett-Theron</td>
+                                    <td>Referee</td>
+                                    <td><span class="badge badge-success">International</span></td>
+                                    <td>45</td>
+                                    <td><span class="badge badge-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.5rem;">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- New Official Registration -->
+                <div id="newOfficial" class="tab-content">
+                    <form id="officialForm">
+                        <h3>Personal Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">First Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Last Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Email</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Mobile Number</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 2rem;">Official Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Official Type</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Type</option>
+                                    <option value="referee">Referee</option>
+                                    <option value="assistant">Assistant Referee</option>
+                                    <option value="tmo">TMO</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Certification Level</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Level</option>
+                                    <option value="international">International</option>
+                                    <option value="national">National</option>
+                                    <option value="provincial">Provincial</option>
+                                    <option value="club">Club</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>World Rugby Certification Number</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Provincial Union</label>
+                                <select class="form-control">
+                                    <option value="">Select Union</option>
+                                    <option value="harare">Harare Metropolitan</option>
+                                    <option value="bulawayo">Bulawayo Metropolitan</option>
+                                    <option value="manicaland">Manicaland</option>
+                                    <option value="mashonaland">Mashonaland</option>
+                                    <option value="matabeleland">Matabeleland</option>
+                                    <option value="midlands">Midlands</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Register Official</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('officialForm').reset()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Module -->
+        <div id="reports" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Reports & Analytics</h2>
+                </div>
+
+                <div class="form-grid">
+                    <div class="card">
+                        <h3>📊 Player Statistics</h3>
+                        <p>Generate comprehensive player statistics and performance reports.</p>
+                        <button class="btn btn-primary">Generate Report</button>
+                    </div>
+                    <div class="card">
+                        <h3>📈 Transfer Reports</h3>
+                        <p>View transfer trends and approval rates.</p>
+                        <button class="btn btn-primary">Generate Report</button>
+                    </div>
+                    <div class="card">
+                        <h3>🏆 Competition Records</h3>
+                        <p>Access historical match data and tournament results.</p>
+                        <button class="btn btn-primary">Generate Report</button>
+                    </div>
+                    <div class="card">
+                        <h3>👥 Eligibility Summary</h3>
+                        <p>Review test status applications and eligibility data.</p>
+                        <button class="btn btn-primary">Generate Report</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h3>Tour Reports</h3>
+                    <form>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="required">Tour Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Date Range</label>
+                                <input type="text" class="form-control" placeholder="e.g., 01 Nov - 15 Nov 2025" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Destination</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Tour Summary</label>
+                            <textarea class="form-control" rows="5" required></textarea>
+                        </div>
+                        <div class="file-upload">
+                            <p>📎 Upload supporting documents</p>
+                            <input type="file" accept=".pdf,.doc,.docx" multiple style="display: none;">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Submit Tour Report</button>
+                            <button type="button" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Module -->
+        <div id="settings" class="module">
+            <div class="card">
+                <div class="card-header">
+                    <h2>System Settings</h2>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('systemSettings')">System</button>
+                    <button class="tab-btn" onclick="showTab('dataManagement')">Data Management</button>
+                    <button class="tab-btn" onclick="showTab('userManagement')">User Management</button>
+                </div>
+
+                <!-- System Settings -->
+                <div id="systemSettings" class="tab-content active">
+                    <h3>Application Settings</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" checked>
+                            Enable offline mode
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" checked>
+                            Auto-sync when online
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox">
+                            Email notifications
+                        </label>
+                    </div>
+                    <button class="btn btn-primary">Save Settings</button>
+                </div>
+
+                <!-- Data Management -->
+                <div id="dataManagement" class="tab-content">
+                    <h3>Data Management</h3>
+                    <div class="card">
+                        <h4>Export Data</h4>
+                        <p>Export database to CSV or JSON format.</p>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary">Export as CSV</button>
+                            <button class="btn btn-secondary">Export as JSON</button>
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top: 1rem;">
+                        <h4>Import Data</h4>
+                        <p>Import player and team data from files.</p>
+                        <div class="file-upload">
+                            <p>📎 Click to select import file</p>
+                            <input type="file" accept=".csv,.json" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top: 1rem; border-left: 4px solid var(--danger);">
+                        <h4>Clear Local Data</h4>
+                        <p>⚠️ This will delete all locally stored data. Make sure you have synced with the server first.</p>
+                        <button class="btn btn-danger">Clear All Local Data</button>
+                    </div>
+                </div>
+
+                <!-- User Management -->
+                <div id="userManagement" class="tab-content">
+                    <h3>User Management</h3>
+                    <p>User management features coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Module Navigation
+        function showModule(moduleId) {
+            // Hide all modules
+            document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+            // Show selected module
+            document.getElementById(moduleId).classList.add('active');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Save to localStorage
+            localStorage.setItem('currentModule', moduleId);
+        }
+
+        // Tab Navigation
+        function showTab(tabId) {
+            // Get the parent container
+            const container = event.target.closest('.card') || event.target.closest('.module');
+            
+            // Hide all tab contents in this container
+            container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            // Show selected tab
+            const tab = document.getElementById(tabId);
+            if (tab) tab.classList.add('active');
+            
+            // Update tab buttons in this container
+            container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Transfer Type Toggle
+        function toggleTransferFields() {
+            const transferType = document.getElementById('transferType').value;
+            const internationalFields = document.getElementById('internationalFields');
+            
+            if (transferType === 'international') {
+                internationalFields.style.display = 'block';
+            } else {
+                internationalFields.style.display = 'none';
+            }
+        }
+
+        // Qualification Type Toggle
+        function toggleQualificationFields(type) {
+            const residenceFields = document.getElementById('residenceFields');
+            
+            if (type === 'residence') {
+                residenceFields.style.display = 'block';
+            } else {
+                residenceFields.style.display = 'none';
+            }
+        }
+
+        // Test Match Request - Match Type Toggle
+        function toggleMatchTypeFields() {
+            const matchType = document.getElementById('matchType').value;
+            const competitionFields = document.getElementById('competitionFields');
+            
+            if (matchType === 'rwc-qualifier' || matchType === 'rugby-africa' || 
+                matchType === 'cwg' || matchType === 'sevens-series' || matchType === 'other') {
+                competitionFields.style.display = 'block';
+            } else {
+                competitionFields.style.display = 'none';
+            }
+        }
+
+        // Test Match Request - Venue Type Toggle
+        function toggleVenueFields() {
+            const venueType = document.getElementById('venueType').value;
+            const homeVenueFields = document.getElementById('homeVenueFields');
+            const awayVenueFields = document.getElementById('awayVenueFields');
+            
+            homeVenueFields.style.display = 'none';
+            awayVenueFields.style.display = 'none';
+            
+            if (venueType === 'home') {
+                homeVenueFields.style.display = 'block';
+            } else if (venueType === 'away' || venueType === 'neutral') {
+                awayVenueFields.style.display = 'block';
+            }
+        }
+
+        // Save test match request as draft
+        function saveAsDraft() {
+            alert('Test match request saved as draft. You can complete it later.');
+            // In production, this would save to IndexedDB
+        }
+
+        // File Upload Handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make file upload areas clickable
+            document.querySelectorAll('.file-upload').forEach(area => {
+                area.addEventListener('click', function() {
+                    const fileInput = this.querySelector('input[type="file"]');
+                    if (fileInput) fileInput.click();
+                });
+            });
+
+            // Restore last viewed module
+            const lastModule = localStorage.getItem('currentModule');
+            if (lastModule && document.getElementById(lastModule)) {
+                document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+                document.getElementById(lastModule).classList.add('active');
+                
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[onclick="showModule('${lastModule}')"]`)?.classList.add('active');
+            }
+
+            // Check online status
+            updateConnectionStatus();
+            window.addEventListener('online', updateConnectionStatus);
+            window.addEventListener('offline', updateConnectionStatus);
+        });
+
+        // Connection Status
+        function updateConnectionStatus() {
+            const indicator = document.getElementById('offlineIndicator');
+            const statusText = document.getElementById('connectionStatus');
+            
+            if (navigator.onLine) {
+                indicator.classList.remove('offline');
+                statusText.textContent = 'Online';
+            } else {
+                indicator.classList.add('offline');
+                statusText.textContent = 'Offline';
+            }
+        }
+
+        // Sync Data
+        function syncData() {
+            if (!navigator.onLine) {
+                alert('Cannot sync while offline. Please connect to the internet.');
+                return;
+            }
+            
+            const lastSync = document.getElementById('lastSync');
+            lastSync.textContent = new Date().toLocaleString();
+            alert('Data synchronized successfully!');
+            
+            // Store in localStorage
+            localStorage.setItem('lastSyncTime', new Date().toISOString());
+        }
+
+        // Search Functions
+        function searchPlayers() {
+            alert('Search functionality will filter players based on criteria');
+        }
+
+        function searchTeams() {
+            alert('Search functionality will filter teams based on criteria');
+        }
+
+        function searchTransfers() {
+            alert('Search functionality will filter transfers based on criteria');
+        }
+
+        // Form Submissions
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formId = e.target.id;
+            let message = '';
+            
+            switch(formId) {
+                case 'playerRegistrationForm':
+                    message = 'Player registered successfully!';
+                    break;
+                case 'teamRegistrationForm':
+                    message = 'Team registered successfully!';
+                    break;
+                case 'transferForm':
+                    message = 'Transfer request submitted successfully!';
+                    break;
+                case 'testMatchRequestForm':
+                    message = 'Test match request submitted successfully! ZRU Technical Committee will review within 5 business days.';
+                    break;
+                case 'officialForm':
+                    message = 'Match official registered successfully!';
+                    break;
+                default:
+                    message = 'Form submitted successfully!';
+            }
+            
+            alert(message);
+            e.target.reset();
+        });
+
+        // IndexedDB Setup for Offline Storage
+        let db;
+        const dbName = 'ZRU_Database';
+        const version = 1;
+
+        const request = indexedDB.open(dbName, version);
+
+        request.onerror = function() {
+            console.error('Database failed to open');
+        };
+
+        request.onsuccess = function() {
+            db = request.result;
+            console.log('Database opened successfully');
+        };
+
+        request.onupgradeneeded = function(e) {
+            db = e.target.result;
+
+            // Create object stores if they don't exist
+            if (!db.objectStoreNames.contains('players')) {
+                const playersStore = db.createObjectStore('players', { keyPath: 'id', autoIncrement: true });
+                playersStore.createIndex('name', 'name', { unique: false });
+            }
+
+            if (!db.objectStoreNames.contains('teams')) {
+                const teamsStore = db.createObjectStore('teams', { keyPath: 'id', autoIncrement: true });
+                teamsStore.createIndex('name', 'name', { unique: false });
+            }
+
+            if (!db.objectStoreNames.contains('transfers')) {
+                const transfersStore = db.createObjectStore('transfers', { keyPath: 'id', autoIncrement: true });
+            }
+
+            if (!db.objectStoreNames.contains('testMatches')) {
+                const testMatchesStore = db.createObjectStore('testMatches', { keyPath: 'id', autoIncrement: true });
+                testMatchesStore.createIndex('status', 'status', { unique: false });
+                testMatchesStore.createIndex('matchDate', 'matchDate', { unique: false });
+            }
+
+            if (!db.objectStoreNames.contains('officials')) {
+                const officialsStore = db.createObjectStore('officials', { keyPath: 'id', autoIncrement: true });
+            }
+
+            console.log('Database setup complete');
+        };
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+    </script>
+</body>
+</html>
